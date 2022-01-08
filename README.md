@@ -1,15 +1,17 @@
 # Automatic Distribution Fitting of Tabular Features using Simulated Annealling
+Allocating a parametric distribution to features in a tumbler data is a well-known problem for all data analysis as this provides a wide range of abilities such as better explainability, generation of new samples, and better picking of classification and regressions model using meta-learning. In this study, we propose a simulated annealing approach to allocate a parametric distribution for features, obtaining the optimal distribution and its parameters. 
 
-ADD HERE A 2-sentence summary later.
+## Usage Example
+1. Download all the data files in a CSV format and put them in the "/data" folder.
+2. Run the **main.py** script.
+3. Chcekout the results in the "/results" folder
 
-## Summery
-Take the abstract from the summary later.
-
-## Example
-Add an example as shown in the report.
-
-## Sample data
-ADD here later
+## Data
+In the experiments provided in this repo we are using four datasets:
+1. [Car Evaluation Data Set](https://archive.ics.uci.edu/ml/datasets/Car+Evaluation)
+2. [Airfoil Self-Noise Data Set](https://archive.ics.uci.edu/ml/datasets/Airfoil+Self-Noise)
+3. [Banknote authentication Data Set](https://archive.ics.uci.edu/ml/datasets/banknote+authentication)
+4. [Maternal Health Risk Data Set Data Set](https://archive.ics.uci.edu/ml/datasets/Maternal+Health+Risk+Data+Set)
 
 ## Structure
 The project is structured as follows:
