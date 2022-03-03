@@ -1,10 +1,10 @@
 # library imports
-from enum import Enum
+from enum import IntEnum
 
 # project imports
 
 
-class DistType(Enum):
+class DistType(IntEnum):
     """
     Enum for dist types
     """
@@ -12,7 +12,11 @@ class DistType(Enum):
     Uniform = 1
     NORMAL = 2
 
+
+
+
 # TODO: parameters and mapper functions between distributions and something we can work with
+
 
 
 class AlgoState:

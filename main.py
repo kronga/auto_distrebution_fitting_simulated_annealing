@@ -6,6 +6,7 @@ from glob import glob
 
 # project imports
 from algo import Algo
+import brute_force_fitter
 
 
 class Main:
@@ -37,7 +38,7 @@ class Main:
         for data_file_path in glob(os.path.join(Main.DATA_FOLDER_PATH, "*.csv")):
             df = pd.read_csv(data_file_path)
             answer = Algo.run(df=df,
-                              fix_gaps=True,
+                              fix_gaps=False,
                               k=Main.TOP_K_ALGO)
             with open(os.path.join(Main.RESULTS_FOLDER_PATH, os.path.basename(data_file_path).replace(".csv", ".json")), "w") as answer_file:
                 json.dump(answer, answer_file)

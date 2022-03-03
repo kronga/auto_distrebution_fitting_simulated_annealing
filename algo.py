@@ -7,7 +7,7 @@ import pandas as pd
 from dists import Dists
 from algo_state import AlgoState
 from smart_gap_filler import SmartGapFiller
-
+from brute_force_fitter import histData
 
 class Algo:
     """
@@ -43,6 +43,7 @@ class Algo:
         else:
             df.dropna(axis=0, inplace=True)
         # return answer
+        # histData(df[:, 0])
         return {col: Algo._feature_run(data=df[col].tolist(),
                                        iters=iters)
                 for col in list(df)}
@@ -108,7 +109,7 @@ class Algo:
         """
         computes the fitness of the state given the data
         """
-        raise Dists.fitness(data=data,
+        return Dists.fitness(data=data,
                             state=state)
 
     @staticmethod
@@ -117,5 +118,5 @@ class Algo:
         """
         A small state change to compute the differential of the current state
         """
-        raise Dists.move(state=state,
+        return Dists.move(state=state,
                          temperature=temperature)

@@ -1,6 +1,6 @@
 # library imports
 from scipy import stats
-from random import randint
+from random import randint, choice
 
 # project imports
 from algo_state import AlgoState, DistType
@@ -16,6 +16,11 @@ class Dists:
     PROBABILITY_TO_MOVE_DIST = 0.5
 
     DIST_COUNT = 2
+    other_dists = {DistType.Uniform: [DistType.NORMAL],
+                   DistType.NORMAL: [DistType.Uniform]}
+    param_num = {DistType.Uniform: 1,
+                 DistType.NORMAL: 2}
+
     # END - CONSTS #
 
     def __init__(self):
@@ -28,7 +33,7 @@ class Dists:
         """
         # TODO: the magic numbers in this method can be driven from the data with some logic for better results
         # random dist
-        dist_pick = randint(1, Dists.DIST_COUNT+1)
+        dist_pick = randint(1, Dists.DIST_COUNT)
         if dist_pick == DistType.Uniform:
             return AlgoState(dist_type=DistType.Uniform,
                              parameters=[randint(0, 100)])
@@ -66,9 +71,11 @@ class Dists:
         Check how well a data is fitted in the state
         """
         if state.dist_type == DistType.Uniform:
-            return stats.kstest(data, 'uniform')[1] # the p-value of the Kolmogorov–Smirnov test for uniform distribution
+            return stats.kstest(data, 'uniform')[
+                1]  # the p-value of the Kolmogorov–Smirnov test for uniform distribution
         elif state.dist_type == DistType.NORMAL:
-            return stats.normaltest(data)[1]  # the p-value of how we sure this is a normal dist
+            return stats.kstest(data, 'norm', args=state.parameters)[
+                1]  # the p-value of how we sure this is a normal dist
         else:
             raise Exception("We do not support in this type of distribution")
 
@@ -79,19 +86,21 @@ class Dists:
         find a state around the current state such that the temperature is now too much
         """
         # check if we want to try another dist
-        if temperature > Dists.MIN_TEMP_TO_SWAP_DISTS and randint(0, 100)/100 < Dists.PROBABILITY_TO_MOVE_DIST:
+        if temperature > Dists.MIN_TEMP_TO_SWAP_DISTS and randint(0, 100) / 100 < Dists.PROBABILITY_TO_MOVE_DIST:
             if state.dist_type == DistType.Uniform:
-                raise NotImplementedError("")
+                return AlgoState(choice(Dists.other_dists[state.dist_type]),
+                                 parameters=[randint(0, 100), randint(0, 10)])
             elif state.dist_type == DistType.NORMAL:
-                raise NotImplementedError("")
+                return AlgoState(choice(Dists.other_dists[state.dist_type]), parameters=[randint(0, 100)])
             else:
                 raise Exception("We do not support in this type of distribution")
         else:
             # play along the parameters of this distribution
             if state.dist_type == DistType.Uniform:
-                raise NotImplementedError("")
+                return AlgoState(dist_type=DistType.Uniform,
+                                 parameters=[randint(0, 100)])
             elif state.dist_type == DistType.NORMAL:
-                raise NotImplementedError("")
+                return AlgoState(dist_type=DistType.NORMAL,
+                                 parameters=[randint(0, 100), randint(0, 10)])
             else:
                 raise Exception("We do not support in this type of distribution")
-
