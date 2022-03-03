@@ -1,6 +1,9 @@
 # library imports
+import numpy as np
 from scipy import stats
 from random import randint, choice
+from dictances import bhattacharyya
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 # project imports
 from algo_state import AlgoState, DistType
@@ -12,14 +15,16 @@ class Dists:
     """
 
     # CONSTS #
-    MIN_TEMP_TO_SWAP_DISTS = 50  # TODO: play with this number later
+    MIN_TEMP_TO_SWAP_DISTS = 300  # TODO: play with this number later
     PROBABILITY_TO_MOVE_DIST = 0.5
 
-    DIST_COUNT = 2
-    other_dists = {DistType.Uniform: [DistType.NORMAL],
-                   DistType.NORMAL: [DistType.Uniform]}
-    param_num = {DistType.Uniform: 1,
-                 DistType.NORMAL: 2}
+    DIST_COUNT = 4
+    ALL_DISTS = [DistType.Uniform, DistType.NORMAL, DistType.EXP, DistType.WEIBULL_MIN]
+    PARAM_NUM = {DistType.Uniform: 2,
+                 DistType.NORMAL: 2,
+                 DistType.EXP: 2,
+                 DistType.WEIBULL_MIN: 3
+                 }
 
     # END - CONSTS #
 
@@ -36,10 +41,17 @@ class Dists:
         dist_pick = randint(1, Dists.DIST_COUNT)
         if dist_pick == DistType.Uniform:
             return AlgoState(dist_type=DistType.Uniform,
-                             parameters=[randint(0, 100)])
+                             parameters=[np.random.normal(0, 3), np.random.normal(0, 1)])
         elif dist_pick == DistType.NORMAL:
             return AlgoState(dist_type=DistType.NORMAL,
-                             parameters=[randint(0, 100), randint(0, 10)])
+                             parameters=[np.random.normal(0, 3), abs(np.random.normal(0, 3))])
+        elif dist_pick == DistType.EXP:
+            return AlgoState(dist_type=DistType.EXP,
+                             parameters=[np.random.normal(0, 3), abs(np.random.normal(0, 3))])
+        elif dist_pick == DistType.WEIBULL_MIN:
+            return AlgoState(dist_type=DistType.EXP,
+                             parameters=[abs(np.random.normal(0, 3)), abs(np.random.normal(0, 3)),
+                                         abs(np.random.normal(0, 3))])
         else:
             raise Exception("We do not support in this type of distribution")
 
@@ -57,7 +69,8 @@ class Dists:
         convert the distribution (e.g., algo_state instance) to the right string representation
         """
         if state.dist_type == DistType.Uniform:
-            return "<Uniform: {}>".format(state.parameters[0])
+            return "<Uniform: loc = {}, scale = {}>".format(state.parameters[0],
+                                                            state.parameters[1])
         elif state.dist_type == DistType.NORMAL:
             return "<Normal: mean = {}, std = {}>".format(state.parameters[0],
                                                           state.parameters[1])
@@ -71,14 +84,26 @@ class Dists:
         Check how well a data is fitted in the state
         """
         if state.dist_type == DistType.Uniform:
-            return stats.kstest(data, 'uniform')[
-                1]  # the p-value of the Kolmogorov–Smirnov test for uniform distribution
+            # return mean_absolute_error(y_true=data, y_pred=[state.parameters[0] for _ in range(len(data))])
+
+            return stats.kstest(data, 'uniform')[0]  # the p-value of the Kolmogorov–Smirnov test for uniform distribution
         elif state.dist_type == DistType.NORMAL:
-            return stats.kstest(data, 'norm', args=state.parameters)[
-                1]  # the p-value of how we sure this is a normal dist
+            # data_mean = np.mean(data)
+            # data_std = np.std(data)
+            # return mean_squared_error([data_mean, data_std], state.parameters)
+
+
+            #y_pred = np.random.normal(state.parameters[0], state.parameters[1], len(data))
+            #return mean_squared_error(y_true=data, y_pred=y_pred) + mean_absolute_error(y_true=data, y_pred=y_pred)
+            return stats.kstest(data, 'norm', args=state.parameters)[0]  # the p-value of how we sure this is a normal dist
+        elif state.dist_type == DistType.EXP:
+            return stats.kstest(data, 'expon', args=state.parameters)[0]
+        elif state.dist_type == DistType.WEIBULL_MIN:
+            return stats.kstest(data, 'weibull_min', args=state.parameters)[0]
         else:
             raise Exception("We do not support in this type of distribution")
 
+    @staticmethod
     @staticmethod
     def move(state: AlgoState,
              temperature: float):
@@ -87,20 +112,34 @@ class Dists:
         """
         # check if we want to try another dist
         if temperature > Dists.MIN_TEMP_TO_SWAP_DISTS and randint(0, 100) / 100 < Dists.PROBABILITY_TO_MOVE_DIST:
-            if state.dist_type == DistType.Uniform:
-                return AlgoState(choice(Dists.other_dists[state.dist_type]),
-                                 parameters=[randint(0, 100), randint(0, 10)])
-            elif state.dist_type == DistType.NORMAL:
-                return AlgoState(choice(Dists.other_dists[state.dist_type]), parameters=[randint(0, 100)])
+            # get the list of dists we can chose from
+            remain_dists = Dists.ALL_DISTS.copy()
+            remain_dists.remove(state.dist_type)
+            # chose dist to move to
+            chosen_dist = choice(remain_dists)
+            # pick number of params
+            parameters = [parm_value + np.random.normal(0, 0.05) for parm_value in state.parameters]
+            if len(parameters) < Dists.PARAM_NUM[chosen_dist]:
+                parameters.extend([np.random.normal(1, 0.1) for _ in range(Dists.PARAM_NUM[chosen_dist] - len(parameters))])
             else:
-                raise Exception("We do not support in this type of distribution")
+                parameters = parameters[:Dists.PARAM_NUM[chosen_dist]]
+
+            # edge case
+            if chosen_dist == DistType.NORMAL and parameters[1] < 0:
+                parameters[1] = parameters[1] * -1
+
+            return AlgoState(dist_type=chosen_dist,
+                             parameters=parameters)
         else:
             # play along the parameters of this distribution
             if state.dist_type == DistType.Uniform:
                 return AlgoState(dist_type=DistType.Uniform,
-                                 parameters=[randint(0, 100)])
+                                 parameters=[state.parameters[0] + np.random.normal(0, 2),
+                                             state.parameters[1] + np.random.normal(0, 0.5)])
             elif state.dist_type == DistType.NORMAL:
+                std = state.parameters[1] + np.random.normal(0, 0.05)
                 return AlgoState(dist_type=DistType.NORMAL,
-                                 parameters=[randint(0, 100), randint(0, 10)])
+                                 parameters=[state.parameters[0] + np.random.normal(0, 0.5),
+                                             std if std > 0 else std * -1])
             else:
                 raise Exception("We do not support in this type of distribution")

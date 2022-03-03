@@ -18,6 +18,7 @@ class Main:
     DATA_FOLDER_PATH = os.path.join(os.path.dirname(__file__), "data")
     RESULTS_FOLDER_PATH = os.path.join(os.path.dirname(__file__), "results")
     TOP_K_ALGO = 5
+    DEBUG_FLAG = True
     # END - CONSTS #
 
     def __init__(self):
@@ -39,7 +40,8 @@ class Main:
             df = pd.read_csv(data_file_path)
             answer = Algo.run(df=df,
                               fix_gaps=False,
-                              k=Main.TOP_K_ALGO)
+                              k=Main.TOP_K_ALGO,
+                              debug=Main.DEBUG_FLAG)
             with open(os.path.join(Main.RESULTS_FOLDER_PATH, os.path.basename(data_file_path).replace(".csv", ".json")), "w") as answer_file:
                 json.dump(answer, answer_file)
 

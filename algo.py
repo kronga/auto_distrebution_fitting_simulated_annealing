@@ -2,6 +2,7 @@
 import math
 import random
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
 
 # project imports
 from dists import Dists
@@ -17,7 +18,7 @@ class Algo:
 
     # COSNTS #
     MIN_TEMPERATURE = 10
-    MAX_TEMPERATURE = 1000
+    MAX_TEMPERATURE = 20000
     # END - CONSTS #
 
     def __init__(self):
@@ -27,7 +28,8 @@ class Algo:
     def run(df: pd.DataFrame,
             fix_gaps: bool,
             k: int,
-            iters: int = 100):
+            iters: int = 5000,
+            debug: bool = False):
         """
         A single entry point for the algorithm
         :param df: the DF we would like to fill
@@ -45,12 +47,14 @@ class Algo:
         # return answer
         # histData(df[:, 0])
         return {col: Algo._feature_run(data=df[col].tolist(),
-                                       iters=iters)
-                for col in list(df)}
+                                       iters=iters,
+                                       debug=debug)
+                for col in list(df) if is_numeric_dtype(df[col])}
 
     @staticmethod
     def _feature_run(data: list,
-                     iters: int):
+                     iters: int,
+                     debug: bool = False):
         """
         Run the algorithm for a single feature (as a list object).
         It minimizes the energy of a system by simulated annealing.
@@ -70,8 +74,9 @@ class Algo:
         state = Dists.random()
         energy = Algo._energy(data=data,
                               state=state)
-        prev_state = Dists.copy(state)
-        prev_energy = energy
+        # just to debug
+        if debug:
+            print("{}: {} with E = {:.3f}".format(step, state, energy))
         best_state = Dists.copy(state)
         best_energy = energy
 
@@ -81,25 +86,22 @@ class Algo:
             step += 1
             # compute new temperature
             temp = Algo.MAX_TEMPERATURE * math.exp(temp_factor * step / iters)
-            de = Algo._move(state=state,
-                            temperature=temp)
-            if de is None:
-                energy = Algo._energy(data=data,
-                                      state=state)
-                de = energy - prev_energy
-            else:
-                energy += de
-            if de > 0.0 and math.exp(-de / temp) < random.random():
-                # Restore previous state
-                state = Dists.copy(state=prev_state)
-                energy = prev_energy
-            else:
+            new_state = Algo._move(state=state,
+                                   temperature=temp)
+            new_energy = Algo._energy(data=data,
+                                      state=new_state)
+            delta_energy = new_energy - energy
+            if delta_energy < 0: #and math.exp(-delta_energy / temp) < random.random():
                 # Accept new state and compare to best state
-                prev_state = Dists.copy(state=state)
-                prev_energy = energy
+                state = Dists.copy(state=new_state)
+                energy = new_energy
                 if energy < best_energy:
                     best_state = Dists.copy(state=state)
                     best_energy = energy
+
+            # just to debug
+            if debug:
+                print("{}: {} with E = {:.3f}".format(step, state, energy))
         # return answer
         return Dists.to_string(state=best_state)
 
@@ -110,7 +112,7 @@ class Algo:
         computes the fitness of the state given the data
         """
         return Dists.fitness(data=data,
-                            state=state)
+                             state=state)
 
     @staticmethod
     def _move(state: AlgoState,

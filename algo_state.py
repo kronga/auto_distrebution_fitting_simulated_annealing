@@ -11,12 +11,9 @@ class DistType(IntEnum):
 
     Uniform = 1
     NORMAL = 2
-
-
-
-
-# TODO: parameters and mapper functions between distributions and something we can work with
-
+    EXP = 3
+    WEIBULL_MIN = 4
+    WEIBULL_MAX = 5
 
 
 class AlgoState:
@@ -29,3 +26,10 @@ class AlgoState:
                  parameters: list):
         self.dist_type = dist_type
         self.parameters = parameters
+
+    def __repr__(self):
+        return "<State: type = {}, parms = {}>".format(self.dist_type,
+                                                       self.parameters)
+
+    def __str__(self):
+        return self.__repr__()
