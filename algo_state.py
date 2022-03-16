@@ -13,7 +13,6 @@ class DistType(IntEnum):
     NORMAL = 2
     EXP = 3
     WEIBULL_MIN = 4
-    WEIBULL_MAX = 5
 
 
 class AlgoState:

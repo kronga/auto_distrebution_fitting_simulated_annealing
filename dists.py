@@ -20,7 +20,7 @@ class Dists:
 
     DIST_COUNT = 4
     ALL_DISTS = [DistType.Uniform, DistType.NORMAL, DistType.EXP, DistType.WEIBULL_MIN]
-    PARAM_NUM = {DistType.Uniform: 2,
+    PARAM_NUM = {DistType.Uniform: 1,
                  DistType.NORMAL: 2,
                  DistType.EXP: 2,
                  DistType.WEIBULL_MIN: 3
@@ -41,7 +41,7 @@ class Dists:
         dist_pick = randint(1, Dists.DIST_COUNT)
         if dist_pick == DistType.Uniform:
             return AlgoState(dist_type=DistType.Uniform,
-                             parameters=[np.random.normal(0, 3), np.random.normal(0, 1)])
+                             parameters=[np.random.normal(0, 3)])
         elif dist_pick == DistType.NORMAL:
             return AlgoState(dist_type=DistType.NORMAL,
                              parameters=[np.random.normal(0, 3), abs(np.random.normal(0, 3))])
@@ -49,7 +49,7 @@ class Dists:
             return AlgoState(dist_type=DistType.EXP,
                              parameters=[np.random.normal(0, 3), abs(np.random.normal(0, 3))])
         elif dist_pick == DistType.WEIBULL_MIN:
-            return AlgoState(dist_type=DistType.EXP,
+            return AlgoState(dist_type=DistType.WEIBULL_MIN,
                              parameters=[abs(np.random.normal(0, 3)), abs(np.random.normal(0, 3)),
                                          abs(np.random.normal(0, 3))])
         else:
@@ -69,8 +69,7 @@ class Dists:
         convert the distribution (e.g., algo_state instance) to the right string representation
         """
         if state.dist_type == DistType.Uniform:
-            return "<Uniform: loc = {}, scale = {}>".format(state.parameters[0],
-                                                            state.parameters[1])
+            return "<Uniform: loc = {}>".format(state.parameters[0])
         elif state.dist_type == DistType.NORMAL:
             return "<Normal: mean = {}, std = {}>".format(state.parameters[0],
                                                           state.parameters[1])
@@ -92,7 +91,6 @@ class Dists:
             # data_std = np.std(data)
             # return mean_squared_error([data_mean, data_std], state.parameters)
 
-
             #y_pred = np.random.normal(state.parameters[0], state.parameters[1], len(data))
             #return mean_squared_error(y_true=data, y_pred=y_pred) + mean_absolute_error(y_true=data, y_pred=y_pred)
             return stats.kstest(data, 'norm', args=state.parameters)[0]  # the p-value of how we sure this is a normal dist
@@ -103,7 +101,7 @@ class Dists:
         else:
             raise Exception("We do not support in this type of distribution")
 
-    @staticmethod
+
     @staticmethod
     def move(state: AlgoState,
              temperature: float):
@@ -134,12 +132,21 @@ class Dists:
             # play along the parameters of this distribution
             if state.dist_type == DistType.Uniform:
                 return AlgoState(dist_type=DistType.Uniform,
-                                 parameters=[state.parameters[0] + np.random.normal(0, 2),
-                                             state.parameters[1] + np.random.normal(0, 0.5)])
+                                 parameters=[state.parameters[0] + np.random.normal(0, 2)])
             elif state.dist_type == DistType.NORMAL:
                 std = state.parameters[1] + np.random.normal(0, 0.05)
                 return AlgoState(dist_type=DistType.NORMAL,
                                  parameters=[state.parameters[0] + np.random.normal(0, 0.5),
                                              std if std > 0 else std * -1])
+            elif state.dist_type == DistType.EXP:
+                scale = state.parameters[1] + np.random.normal(0, 0.05)
+                return AlgoState(dist_type=DistType.NORMAL,
+                                 parameters=[state.parameters[0] + np.random.normal(0, 0.5),
+                                             scale if scale > 0 else scale * -1])
+            elif state.dist_type == DistType.WEIBULL_MIN:
+                scale = state.parameters[1] + np.random.normal(0, 0.05)
+                return AlgoState(dist_type=DistType.NORMAL,
+                                 parameters=[state.parameters[0] + np.random.normal(0, 0.5),
+                                             scale if scale > 0 else scale * -1])
             else:
                 raise Exception("We do not support in this type of distribution")
