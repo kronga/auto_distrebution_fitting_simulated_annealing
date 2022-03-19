@@ -15,7 +15,7 @@ class Dists:
     """
 
     # CONSTS #
-    MIN_TEMP_TO_SWAP_DISTS = 300  # TODO: play with this number later
+    MIN_TEMP_TO_SWAP_DISTS = 300
     PROBABILITY_TO_MOVE_DIST = 0.5
 
     DIST_COUNT = 2

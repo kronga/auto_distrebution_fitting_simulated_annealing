@@ -6,14 +6,15 @@ import pandas as pd
 from glob import glob
 import scipy.stats as st
 from timeit import timeit
-import statsmodels.api as sm
+# import statsmodels.api as sm
 from pandas.api.types import is_numeric_dtype
 from scipy.stats._continuous_distns import _distn_names
 
 
 class NaiveApproach:
     """
-    DAVID - here
+    The naive approach (bruteforce) fits all distributions using 'scipy' built-in function 'fit
+    that maximaizes the MLE. Afterwards the
     """
 
     def __init__(self):
@@ -33,10 +34,10 @@ class NaiveApproach:
                 best_dist = best_distibutions[0]
 
                 # Make PDF with best params
-                pdf = NaiveApproach.make_pdf(best_dist[0], best_dist[1])
+                # pdf = NaiveApproach.make_pdf(best_dist[0], best_dist[1])
                 end = timeit()
                 times.append(end - start)
-                # TODO: add the fitness of the best fit
+
                 answers.append(best_dist[2])
         return answers, times
 
@@ -46,12 +47,13 @@ class NaiveApproach:
         # Get histogram of original data
         y, x = np.histogram(data, bins=bins, density=True)
         x = (x + np.roll(x, -1))[:-1] / 2.0
+      #   y = data.values
+      #   x = data.index
 
         # Best holders
         best_distributions = []
 
         # Estimate distribution parameters from data
-        # TODO: david - in the "in" list leave only uniform and normal ---- VERY IMPORTANT
         for ii, distribution in enumerate([d for d in _distn_names if d in ['norm', 'uniform']]):
 
             print("{:>3} / {:<3}: {}".format(ii + 1, len(_distn_names), distribution))
