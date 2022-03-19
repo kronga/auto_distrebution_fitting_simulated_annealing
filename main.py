@@ -75,5 +75,6 @@ class Main:
 
 
 if __name__ == '__main__':
+    Main.finalData(2)
     Main.run_example()
-    Main.finalData(50)
+

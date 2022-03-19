@@ -45,13 +45,13 @@ class Dists:
         elif dist_pick == DistType.NORMAL:
             return AlgoState(dist_type=DistType.NORMAL,
                              parameters=[np.random.normal(0, 3), abs(np.random.normal(0, 3))])
-        elif dist_pick == DistType.EXP:
-            return AlgoState(dist_type=DistType.EXP,
-                             parameters=[np.random.normal(0, 3), abs(np.random.normal(0, 3))])
-        elif dist_pick == DistType.WEIBULL_MIN:
-            return AlgoState(dist_type=DistType.WEIBULL_MIN,
-                             parameters=[abs(np.random.normal(0, 3)), abs(np.random.normal(0, 3)),
-                                         abs(np.random.normal(0, 3))])
+        # elif dist_pick == DistType.EXP:
+        #     return AlgoState(dist_type=DistType.EXP,
+        #                      parameters=[np.random.normal(0, 3), abs(np.random.normal(0, 3))])
+        # elif dist_pick == DistType.WEIBULL_MIN:
+        #     return AlgoState(dist_type=DistType.WEIBULL_MIN,
+        #                      parameters=[abs(np.random.normal(0, 3)), abs(np.random.normal(0, 3)),
+        #                                  abs(np.random.normal(0, 3))])
         else:
             raise Exception("We do not support in this type of distribution")
 
@@ -73,13 +73,13 @@ class Dists:
         elif state.dist_type == DistType.NORMAL:
             return "<Normal: mean = {}, std = {}>".format(state.parameters[0],
                                                           state.parameters[1])
-        elif state.dist_type == DistType.EXP:
-            return "<Expon: loc = {}, scale = {}>".format(state.parameters[0],
-                                                         state.parameters[1])
-        elif state.dist_type == DistType.WEIBULL_MIN:
-            return "<Weibull_min: c = {}, loc = {}, scale = {}>".format(state.parameters[0],
-                                                                        state.parameters[1],
-                                                                        state.parameters[2])
+        # elif state.dist_type == DistType.EXP:
+        #     return "<Expon: loc = {}, scale = {}>".format(state.parameters[0],
+        #                                                  state.parameters[1])
+        # elif state.dist_type == DistType.WEIBULL_MIN:
+        #     return "<Weibull_min: c = {}, loc = {}, scale = {}>".format(state.parameters[0],
+        #                                                                 state.parameters[1],
+        #                                                                 state.parameters[2])
         else:
             raise Exception("We do not support in this type of distribution")
 
@@ -90,23 +90,24 @@ class Dists:
         Check how well a data is fitted in the state
         """
         if state.dist_type == DistType.Uniform:
-            # return mean_absolute_error(y_true=data, y_pred=[state.parameters[0] for _ in range(len(data))])
+            return mean_absolute_error(y_true=data, y_pred=[state.parameters[0] for _ in range(len(data))])
 
-            return stats.kstest(data, 'uniform')[0]  # the p-value of the Kolmogorov–Smirnov test for uniform distribution
+            # return stats.kstest(data, 'uniform')[0]  # the p-value of the Kolmogorov–Smirnov test for uniform distribution
         elif state.dist_type == DistType.NORMAL:
-            # data_mean = np.mean(data)
-            # data_std = np.std(data)
-            # return mean_squared_error([data_mean, data_std], state.parameters)
+            data_mean = np.mean(data)
+            data_std = np.std(data)
+            return mean_squared_error([data_mean, data_std], state.parameters)
 
-            #y_pred = np.random.normal(state.parameters[0], state.parameters[1], len(data))
-            #return mean_squared_error(y_true=data, y_pred=y_pred) + mean_absolute_error(y_true=data, y_pred=y_pred)
-            return stats.kstest(data, 'norm', args=state.parameters)[0]  # the p-value of how we sure this is a normal dist
-        elif state.dist_type == DistType.EXP:
-            return stats.kstest(data, 'expon', args=state.parameters)[0]
-        elif state.dist_type == DistType.WEIBULL_MIN:
-            return stats.kstest(data, 'weibull_min', args=state.parameters)[0]
-        else:
-            raise Exception("We do not support in this type of distribution")
+            # y_pred = np.random.normal(stsate.parameters[0], state.parameters[1], len(data))
+            # return mean_squared_error(y_true=data, y_pred=y_pred) + mean_absolute_error(y_true=data, y_pred=y_pred)
+
+        #     return stats.kstest(data, 'norm', args=state.parameters)[0]  # the p-value of how we sure this is a normal dist
+        # elif state.dist_type == DistType.EXP:
+        #     return stats.kstest(data, 'expon', args=state.parameters)[0]
+        # elif state.dist_type == DistType.WEIBULL_MIN:
+        #     return stats.kstest(data, 'weibull_min', args=state.parameters)[0]
+        # else:
+        #     raise Exception("We do not support in this type of distribution")
 
 
     @staticmethod
@@ -145,15 +146,15 @@ class Dists:
                 return AlgoState(dist_type=DistType.NORMAL,
                                  parameters=[state.parameters[0] + np.random.normal(0, 0.5),
                                              std if std > 0 else std * -1])
-            elif state.dist_type == DistType.EXP:
-                scale = state.parameters[1] + np.random.normal(0, 0.05)
-                return AlgoState(dist_type=DistType.NORMAL,
-                                 parameters=[state.parameters[0] + np.random.normal(0, 0.5),
-                                             scale if scale > 0 else scale * -1])
-            elif state.dist_type == DistType.WEIBULL_MIN:
-                scale = state.parameters[1] + np.random.normal(0, 0.05)
-                return AlgoState(dist_type=DistType.NORMAL,
-                                 parameters=[state.parameters[0] + np.random.normal(0, 0.5),
-                                             scale if scale > 0 else scale * -1])
+            # elif state.dist_type == DistType.EXP:
+            #     scale = state.parameters[1] + np.random.normal(0, 0.05)
+            #     return AlgoState(dist_type=DistType.NORMAL,
+            #                      parameters=[state.parameters[0] + np.random.normal(0, 0.5),
+            #                                  scale if scale > 0 else scale * -1])
+            # elif state.dist_type == DistType.WEIBULL_MIN:
+            #     scale = state.parameters[1] + np.random.normal(0, 0.05)
+            #     return AlgoState(dist_type=DistType.NORMAL,
+            #                      parameters=[state.parameters[0] + np.random.normal(0, 0.5),
+            #                                  scale if scale > 0 else scale * -1])
             else:
                 raise Exception("We do not support in this type of distribution")
