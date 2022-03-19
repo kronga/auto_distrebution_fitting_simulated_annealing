@@ -1,14 +1,14 @@
 # library imports
 import math
-import random
 import pandas as pd
+from timeit import timeit
 from pandas.api.types import is_numeric_dtype
 
 # project imports
 from dists import Dists
 from algo_state import AlgoState
 from smart_gap_filler import SmartGapFiller
-from brute_force_fitter import histData
+
 
 class Algo:
     """
@@ -19,6 +19,7 @@ class Algo:
     # COSNTS #
     MIN_TEMPERATURE = 10
     MAX_TEMPERATURE = 20000
+
     # END - CONSTS #
 
     def __init__(self):
@@ -28,7 +29,7 @@ class Algo:
     def run(df: pd.DataFrame,
             fix_gaps: bool,
             k: int,
-            iters: int = 3000,
+            iters: int = 100,
             debug: bool = False):
         """
         A single entry point for the algorithm
@@ -45,11 +46,17 @@ class Algo:
         else:
             df.dropna(axis=0, inplace=True)
         # return answer
-        # histData(df[:, 0])
-        return {col: Algo._feature_run(data=df[col].tolist(),
-                                       iters=iters,
-                                       debug=debug)
-                for col in list(df) if is_numeric_dtype(df[col])}
+        times = []
+        answers = []
+        for col in list(df):
+            if is_numeric_dtype(df[col]):
+                start = timeit()
+                answers.append(Algo._feature_run(data=df[col].tolist(),
+                                                 iters=iters,
+                                                 debug=debug))
+                end = timeit()
+                times.append(end - start)
+        return answers, times
 
     @staticmethod
     def _feature_run(data: list,
@@ -91,7 +98,7 @@ class Algo:
             new_energy = Algo._energy(data=data,
                                       state=new_state)
             delta_energy = new_energy - energy
-            if delta_energy < 0: #and math.exp(-delta_energy / temp) < random.random():
+            if delta_energy < 0:  # and math.exp(-delta_energy / temp) < random.random():
                 # Accept new state and compare to best state
                 state = Dists.copy(state=new_state)
                 energy = new_energy
@@ -103,7 +110,7 @@ class Algo:
             if debug:
                 print("{}: {} with E = {:.3f}".format(step, state, energy))
         # return answer
-        return Dists.to_string(state=best_state)
+        return energy
 
     @staticmethod
     def _energy(data: list,
@@ -121,4 +128,4 @@ class Algo:
         A small state change to compute the differential of the current state
         """
         return Dists.move(state=state,
-                         temperature=temperature)
+                          temperature=temperature)
