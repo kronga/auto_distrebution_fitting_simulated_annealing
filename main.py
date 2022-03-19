@@ -45,8 +45,8 @@ class Main:
         normal_idx = random.sample(range(col_num), col_num // 2)
         for i in range(col_num):
             if i in normal_idx:
-                full_df[i] = pd.DataFrame(np.random.normal(random.uniform(-100, 100), random.uniform(0, 0), row_num))
-            else:
+                df = pd.DataFrame(np.random.normal(random.uniform(-100, 100), random.uniform(0, 0), row_num))
+                full_df[i] = df
                 const = random.uniform(-10, 10)
                 full_df[i] = pd.DataFrame([const for i in range(row_num)])
         return full_df

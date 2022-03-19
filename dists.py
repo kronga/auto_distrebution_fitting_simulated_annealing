@@ -18,12 +18,12 @@ class Dists:
     MIN_TEMP_TO_SWAP_DISTS = 300  # TODO: play with this number later
     PROBABILITY_TO_MOVE_DIST = 0.5
 
-    DIST_COUNT = 4
-    ALL_DISTS = [DistType.Uniform, DistType.NORMAL, DistType.EXP, DistType.WEIBULL_MIN]
+    DIST_COUNT = 2
+    ALL_DISTS = [DistType.Uniform, DistType.NORMAL]
     PARAM_NUM = {DistType.Uniform: 1,
                  DistType.NORMAL: 2,
-                 DistType.EXP: 2,
-                 DistType.WEIBULL_MIN: 3
+                 # DistType.EXP: 2,
+                 # DistType.WEIBULL_MIN: 3
                  }
 
     # END - CONSTS #
@@ -106,8 +106,8 @@ class Dists:
         #     return stats.kstest(data, 'expon', args=state.parameters)[0]
         # elif state.dist_type == DistType.WEIBULL_MIN:
         #     return stats.kstest(data, 'weibull_min', args=state.parameters)[0]
-        # else:
-        #     raise Exception("We do not support in this type of distribution")
+        else:
+            raise Exception("We do not support in this type of distribution")
 
 
     @staticmethod

@@ -11,8 +11,8 @@ class DistType(IntEnum):
 
     Uniform = 1
     NORMAL = 2
-    EXP = 3
-    WEIBULL_MIN = 4
+    # EXP = 3
+    # WEIBULL_MIN = 4
 
 
 class AlgoState:
