@@ -2,7 +2,7 @@
 import numpy as np
 from scipy import stats
 from random import randint, choice
-from dictances import bhattacharyya
+# from distances import bhattacharyya
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 # project imports
@@ -73,6 +73,13 @@ class Dists:
         elif state.dist_type == DistType.NORMAL:
             return "<Normal: mean = {}, std = {}>".format(state.parameters[0],
                                                           state.parameters[1])
+        elif state.dist_type == DistType.EXP:
+            return "<Expon: loc = {}, scale = {}>".format(state.parameters[0],
+                                                         state.parameters[1])
+        elif state.dist_type == DistType.WEIBULL_MIN:
+            return "<Weibull_min: c = {}, loc = {}, scale = {}>".format(state.parameters[0],
+                                                                        state.parameters[1],
+                                                                        state.parameters[2])
         else:
             raise Exception("We do not support in this type of distribution")
 

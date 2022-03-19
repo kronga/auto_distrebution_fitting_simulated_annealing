@@ -28,7 +28,7 @@ class Algo:
     def run(df: pd.DataFrame,
             fix_gaps: bool,
             k: int,
-            iters: int = 5000,
+            iters: int = 3000,
             debug: bool = False):
         """
         A single entry point for the algorithm

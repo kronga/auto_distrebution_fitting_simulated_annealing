@@ -9,6 +9,11 @@ from scipy.stats._continuous_distns import _distn_names
 import matplotlib
 import matplotlib.pyplot as plt
 
+import os
+from glob import glob
+from pandas.api.types import is_numeric_dtype
+DATA_FOLDER_PATH = os.path.join(os.path.dirname(__file__), "data")
+
 matplotlib.rcParams['figure.figsize'] = (16.0, 12.0)
 plt.style.use('ggplot')
 
@@ -86,7 +91,57 @@ def make_pdf(dist, params, size=10000):
 
 
 # Load data from statsmodels datasets
-data = pd.Series(sm.datasets.elnino.load_pandas().data.set_index('YEAR').values.ravel())
+temp = sm.datasets.elnino.load_pandas().data.set_index('YEAR').values.ravel()
+data = pd.Series(temp)
+
+
+#Test other data
+for data_file_path in glob(os.path.join(DATA_FOLDER_PATH, "*.csv")):
+    df = pd.read_csv(data_file_path)
+    for col in list(df):
+        if is_numeric_dtype(df[col]):
+            data = pd.Series(df[col])
+            # Plot for comparison
+            plt.figure(figsize=(12, 8))
+            ax = data.plot(kind='hist', bins=50, density=True, alpha=0.5,
+                           color=list(matplotlib.rcParams['axes.prop_cycle'])[1]['color'])
+
+            # Save plot limits
+            dataYLim = ax.get_ylim()
+
+            # Find best fit distribution
+            best_distibutions = best_fit_distribution(data, 200, ax)
+            best_dist = best_distibutions[0]
+
+            # Update plots
+            ax.set_ylim(dataYLim)
+            ax.set_title(u'El Niño sea temp.\n All Fitted Distributions')
+            ax.set_xlabel(u'Temp (°C)')
+            ax.set_ylabel('Frequency')
+
+            plt.savefig('all_dists.png')
+            plt.show()
+
+            # Make PDF with best params
+            pdf = make_pdf(best_dist[0], best_dist[1])
+
+            # Display
+            plt.figure(figsize=(12, 8))
+            ax = pdf.plot(lw=2, label='PDF', legend=True)
+            data.plot(kind='hist', bins=50, density=True, alpha=0.5, label='Data', legend=True, ax=ax)
+
+            param_names = (best_dist[0].shapes + ', loc, scale').split(', ') if best_dist[0].shapes else ['loc',
+                                                                                                          'scale']
+            param_str = ', '.join(['{}={:0.2f}'.format(k, v) for k, v in zip(param_names, best_dist[1])])
+            dist_str = '{}({})'.format(best_dist[0].name, param_str)
+
+            ax.set_title(u'El Niño sea temp. with best fit distribution \n' + dist_str)
+            ax.set_xlabel(u'Temp. (°C)')
+            ax.set_ylabel('Frequency')
+
+            plt.savefig('best_dist.png')
+            plt.show()
+
 
 # Plot for comparison
 plt.figure(figsize=(12, 8))

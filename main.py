@@ -28,7 +28,7 @@ class Main:
     def run_example():
         """
         This assumes we have a "/data/*.csv" files and run the smart gap filler + distribution fitting algorithm
-        :return: a list of JSONs as the number of data files with the respective columns and the fitted ddistribution
+        :return: a list of JSONs as the number of data files with the respective columns and the fitted distributions
         """
         # make sure we have the "results" folder
         try:
@@ -38,6 +38,7 @@ class Main:
         # get data and run all
         for data_file_path in glob(os.path.join(Main.DATA_FOLDER_PATH, "*.csv")):
             df = pd.read_csv(data_file_path)
+            # df = df.apply(pd.to_numeric)
             answer = Algo.run(df=df,
                               fix_gaps=False,
                               k=Main.TOP_K_ALGO,
