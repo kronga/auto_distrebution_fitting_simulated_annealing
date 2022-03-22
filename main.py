@@ -41,7 +41,8 @@ class Main:
             os.mkdir(Main.DATA_FOLDER_PATH)
         except:
             pass
-        for p_normal in [0, 0.5, 1]:
+        # for p_normal in [0, 0.5, 1]:
+        for p_normal in [0.5]:
             # generate data
             datasets = [Main.create_test_data(df_index=i,
                                               p_normal=p_normal) for i in range(10)]
