@@ -18,7 +18,7 @@ The project is structured as follows:
 
 ## Getting started
 1. Clone the repo
-2. Create a data folder and a results folder in project's folder and edit the corresponding macros in the main file .
+2. Create a folder "data" and a folder "results" inside the project's folder.
 3. Run the project from the 'main.py' file (python main.py or python3 main.py from the terminal)
 
 ## Dependencies
