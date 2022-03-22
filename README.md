@@ -17,9 +17,8 @@ The project is structured as follows:
 
 
 ## Getting started
-1. Clone the repo
-2. Create a folder "data" and a folder "results" inside the project's folder.
-3. Run the project from the 'main.py' file (python main.py or python3 main.py from the terminal)
+1. Clone the repo.
+2. Run the project from the 'main.py' file (python main.py or python3 main.py from the terminal).
 
 ## Dependencies
 - Python               3.7.1
