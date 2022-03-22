@@ -29,7 +29,7 @@ class Algo:
     def run(df: pd.DataFrame,
             fix_gaps: bool,
             k: int,
-            iters: int = 100,
+            iters: int = 300,
             debug: bool = False):
         """
         A single entry point for the algorithm
@@ -37,7 +37,11 @@ class Algo:
         :param fix_gaps: run or not the gap filling algorithm
         :param k: the number of similar rows to take for the "smart fix gaps" algorithm
         :param iters: the number of iterations we allow for the simulated annealing algorithm
-        :return: a dict (json) object with keys as the names of the features and representation of the dists to each one
+        :return: enrgies of best states,
+                 times of performance,
+                 a dict (json) object with keys as the names of the features and representation of the dists to each one
+
+
         """
         # if asked, fill gaps. Otherwise, clear rows with nulls
         if fix_gaps:
@@ -48,15 +52,18 @@ class Algo:
         # return answer
         times = []
         answers = []
+        col_dic = {}
         for col in list(df):
             if is_numeric_dtype(df[col]):
                 start = timeit()
-                answers.append(Algo._feature_run(data=df[col].tolist(),
-                                                 iters=iters,
-                                                 debug=debug))
+                energy, result = Algo._feature_run(data=df[col].tolist(),
+                                  iters=iters,
+                                  debug=debug)
+                answers.append(energy)
+                col_dic[col] = result
                 end = timeit()
                 times.append(end - start)
-        return answers, times
+        return answers, times, col_dic
 
     @staticmethod
     def _feature_run(data: list,
@@ -71,7 +78,7 @@ class Algo:
         (state, energy): the best state and energy found.
         :param data: the data to fit
         :param iters: the number of iterations we allow for the simulated annealing algorithm
-        :return:
+        :return: energy of the final state, the final state
         """
         # technical vars
         step = 0
@@ -110,7 +117,7 @@ class Algo:
             if debug:
                 print("{}: {} with E = {:.3f}".format(step, state, energy))
         # return answer
-        return energy
+        return energy, Dists.to_string(state=best_state)
 
     @staticmethod
     def _energy(data: list,

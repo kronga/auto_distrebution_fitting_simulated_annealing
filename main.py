@@ -2,7 +2,6 @@
 import os
 import json
 import pandas as pd
-from glob import glob
 import numpy as np
 import random
 
@@ -20,7 +19,7 @@ class Main:
     DATA_FOLDER_PATH = os.path.join(os.path.dirname(__file__), "data")
     RESULTS_FOLDER_PATH = os.path.join(os.path.dirname(__file__), "results")
     TOP_K_ALGO = 5
-    DEBUG_FLAG = True
+    DEBUG_FLAG = False
 
     # END - CONSTS #
 
@@ -45,7 +44,7 @@ class Main:
         for p_normal in [0, 0.5, 1]:
             # generate data
             datasets = [Main.create_test_data(df_index=i,
-                                              p_normal=p_normal) for i in range(2)]
+                                              p_normal=p_normal) for i in range(10)]
             # save datasets for later comparison
             [df.to_csv(os.path.join(Main.DATA_FOLDER_PATH, "df_{}.csv".format(i)), index=False) for i, df in
              enumerate(datasets)]
@@ -55,7 +54,7 @@ class Main:
             our_scores = []
             naive_scores = []
             for index, df in enumerate(datasets):
-                answer_sa, times_sa = Algo.run(df=df,
+                answer_sa, times_sa, results_dic = Algo.run(df=df,
                                                fix_gaps=False,
                                                k=Main.TOP_K_ALGO,
                                                debug=Main.DEBUG_FLAG)
@@ -66,12 +65,14 @@ class Main:
                 our_scores.extend(answer_sa)
                 naive_scores.extend(answer_naive)
                 print("Finish with dataset {}".format(index))
+                with open(os.path.join(Main.RESULTS_FOLDER_PATH,"df_"+str(index)+ ".json"), "w") as answer_file:
+                    json.dump(results_dic, answer_file)
             # summarize the results
             print("Answer for p={} for normal feature".format(p_normal))
-            print("\n\nOur:\nPerformance = {:.3f} +- {:.3f},"
-                  "Time = {:.3f} +- {:.3f}\n\n"
-                  "Naive:\nPerformance = {:.3f} +- {:.3f},"
-                  "Time = {:.3f} +- {:.3f}\n\n".format(np.nanmean(our_scores),
+            print("\n\nOur:\nPerformance = {:.6f} +- {:.6f},"
+                  "Time = {:.6f} +- {:.6f}\n\n"
+                  "Naive:\nPerformance = {:.6f} +- {:.6f},"
+                  "Time = {:.6f} +- {:.6f}\n\n".format(np.nanmean(our_scores),
                                                        np.nanstd(our_scores),
                                                        np.nanmean(our_times),
                                                        np.nanstd(our_times),
@@ -79,6 +80,7 @@ class Main:
                                                        np.nanstd(naive_scores),
                                                        np.nanmean(naive_times),
                                                        np.nanstd(naive_times)))
+
 
     @staticmethod
     def create_test_data(df_index: int,

@@ -3,10 +3,8 @@ import os
 import warnings
 import numpy as np
 import pandas as pd
-from glob import glob
 import scipy.stats as st
 from timeit import timeit
-# import statsmodels.api as sm
 from pandas.api.types import is_numeric_dtype
 from scipy.stats._continuous_distns import _distn_names
 
@@ -14,7 +12,7 @@ from scipy.stats._continuous_distns import _distn_names
 class NaiveApproach:
     """
     The naive approach (bruteforce) fits all distributions using 'scipy' built-in function 'fit
-    that maximaizes the MLE. Afterwards the
+    that maximaizes the MLE. The best distribution is picked according to minimal SSE value.
     """
 
     def __init__(self):
@@ -47,8 +45,8 @@ class NaiveApproach:
         # Get histogram of original data
         y, x = np.histogram(data, bins=bins, density=True)
         x = (x + np.roll(x, -1))[:-1] / 2.0
-      #   y = data.values
-      #   x = data.index
+        y_raw = data.values
+        x_raw = data.index.values
 
         # Best holders
         best_distributions = []
@@ -56,7 +54,7 @@ class NaiveApproach:
         # Estimate distribution parameters from data
         for ii, distribution in enumerate([d for d in _distn_names if d in ['norm', 'uniform']]):
 
-            print("{:>3} / {:<3}: {}".format(ii + 1, len(_distn_names), distribution))
+            # print("{:>3} / {:<3}: {}".format(ii + 1, len(_distn_names), distribution))
 
             distribution = getattr(st, distribution)
 
@@ -74,9 +72,16 @@ class NaiveApproach:
                     loc = params[-2]
                     scale = params[-1]
 
+
+                    sse = np.inf
                     # Calculate fitted PDF and error with fit in distribution
-                    pdf = distribution.pdf(x, loc=loc, scale=scale, *arg)
-                    sse = np.sum(np.power(y - pdf, 2.0))
+                    # If distribution is 'uniform' check against original values
+                    if distribution.name == 'uniform':
+                        theor_dist = [loc for i in range(len(y_raw))]
+                        sse = np.sum(np.power(y_raw - theor_dist, 2.0))
+                    else:
+                        pdf = distribution.pdf(x, loc=loc, scale=scale, *arg)
+                        sse = np.sum(np.power(y - pdf, 2.0))
 
                     # identify if this distribution is better
                     best_distributions.append((distribution, params, sse))

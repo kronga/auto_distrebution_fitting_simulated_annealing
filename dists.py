@@ -1,8 +1,6 @@
 # library imports
 import numpy as np
-from scipy import stats
 from random import randint, choice
-# from distances import bhattacharyya
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 # project imports
